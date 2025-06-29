@@ -200,13 +200,13 @@ registerBtn.addEventListener('click', () => {
   const storageRef = storage.ref('avatars/' + Date.now() + '_' + avatarFile.name);
   const uploadTask = storageRef.put(avatarFile);
 
-  uploadTask.on('state_changed',
+  uploadTask.on('state_changed', 
     (snapshot) => {
       // Прогресс загрузки (опционально)
-    },
+    }, 
     (error) => {
       alert('Ошибка загрузки аватарки: ' + error.message);
-    },
+    }, 
     () => {
       // Получение URL загруженной аватарки
       uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
@@ -401,7 +401,7 @@ function updateUI() {
   if (currentUser) {
     authBtnText.textContent = 'Профиль';
     reviewForm.style.display = 'block';
-
+    
     database.ref('users/' + currentUser.uid).once('value')
       .then((snapshot) => {
         const userData = snapshot.val();
@@ -409,13 +409,13 @@ function updateUI() {
         userNickname.style.color = userData.color;
         userPrefix.textContent = userData.prefix ? `[${userData.prefix}]` : '';
         userAvatar.src = userData.avatarUrl;
-
+        
         if (userData.isBanned) {
           alert('Ваш аккаунт заблокирован!');
           auth.signOut();
           return;
         }
-
+        
         if (userData.isAdmin) {
           adminPanel.style.display = 'block';
           loadAdminPanel();
@@ -467,7 +467,7 @@ function updateCounter() {
 // Анимация загрузки
 window.addEventListener('load', function() {
   createAdminAccount();
-
+  
   setTimeout(function() {
     const loader = document.getElementById('loader');
     loader.style.opacity = '0';
@@ -623,9 +623,9 @@ function loadAdminPanel() {
               <button class="admin-btn prefix-btn" data-uid="${childSnapshot.key}">Префикс</button>
             </div>
             <div class="prefix-selector" id="prefixSelector-${childSnapshot.key}" style="display: none;">
-              ${prefixes.map(prefix =>
-            `<div class="prefix-option" data-prefix="${prefix}">${prefix}</div>`
-          ).join('')}
+              ${prefixes.map(prefix => 
+                `<div class="prefix-option" data-prefix="${prefix}">${prefix}</div>`
+              ).join('')}
             </div>
           `;
           adminUsers.appendChild(userDiv);
