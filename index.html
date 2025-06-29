@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CuCe4ka - Игровая визитка</title>
   <link rel="stylesheet" href="styles.css">
-  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css">
 </head>
 <body>
 <!-- Кастомная анимация загрузки -->
@@ -61,6 +61,27 @@
         <label for="regPassword">Пароль</label>
         <input type="password" id="regPassword" class="form-input" placeholder="Придумайте пароль">
       </div>
+
+      <div class="form-group">
+        <label>Цвет ника</label>
+        <div class="color-palette-reg">
+          <div class="color-option-reg active" style="background: #9b51e0;" data-color="#9b51e0"></div>
+          <div class="color-option-reg" style="background: #5865F2;" data-color="#5865F2"></div>
+          <div class="color-option-reg" style="background: #1DB954;" data-color="#1DB954"></div>
+          <div class="color-option-reg" style="background: #FF5733;" data-color="#FF5733"></div>
+          <div class="color-option-reg" style="background: #00FFFF;" data-color="#00FFFF"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="regAvatar">Аватарка</label>
+        <div class="avatar-upload">
+          <input type="file" id="regAvatar" accept="image/*" style="display: none;">
+          <img src="https://i.imgur.com/J3bYfXK.png" class="avatar-preview" id="avatarPreview">
+          <button class="submit-btn" id="uploadBtn" style="margin-top: 10px;">Выбрать аватар</button>
+        </div>
+      </div>
+
       <button class="submit-btn" id="registerBtn">Зарегистрироваться</button>
 
       <div class="auth-links">
@@ -101,7 +122,7 @@
 
     <div class="avatar-container">
       <div class="avatar-frame">
-        <img src="storage/avatar.jpg" class="avatar" alt="Аватар">
+        <img src="storage/avatar.jpg" class="avatar" alt="Аватар" id="userAvatar">
       </div>
       <div class="nickname" id="userNickname">CuCe4ka</div>
       <div class="name" id="userPrefix"></div>
@@ -196,6 +217,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

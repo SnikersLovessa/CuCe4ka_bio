@@ -1,4 +1,3 @@
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBX1CN_D1tnlaO3dTxx3PBu3lml3mh7By0",
   authDomain: "cuce4ka-counter.firebaseapp.com",
@@ -13,6 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
+const storage = firebase.storage();
 
 // Элементы интерфейса
 const authBtn = document.getElementById('authBtn');
@@ -44,12 +44,49 @@ const userNickname = document.getElementById('userNickname');
 const userPrefix = document.getElementById('userPrefix');
 const adminPanel = document.getElementById('adminPanel');
 const adminUsers = document.getElementById('adminUsers');
+const avatarPreview = document.getElementById('avatarPreview');
+const regAvatar = document.getElementById('regAvatar');
+const uploadBtn = document.getElementById('uploadBtn');
+const userAvatar = document.getElementById('userAvatar');
 let currentUser = null;
 let selectedRating = 0;
+let selectedColor = '#9b51e0';
+let avatarFile = null;
+const prefixes = ['Гей', 'Нигер', 'Пидарас', 'Даун', 'Лох', 'Чмо', 'Шлюха', 'Козёл'];
+
+// Переменные для формы регистрации
+let selectedRegColor = '#9b51e0';
+
+// Обработчики выбора цвета в регистрации
+document.querySelectorAll('.color-option-reg').forEach(option => {
+  option.addEventListener('click', function() {
+    selectedRegColor = this.getAttribute('data-color');
+    document.querySelectorAll('.color-option-reg').forEach(opt => {
+      opt.classList.remove('active');
+    });
+    this.classList.add('active');
+  });
+});
+
+// Загрузка аватарки
+uploadBtn.addEventListener('click', () => {
+  regAvatar.click();
+});
+
+regAvatar.addEventListener('change', (e) => {
+  if (e.target.files[0]) {
+    avatarFile = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      avatarPreview.src = e.target.result;
+    };
+    reader.readAsDataURL(avatarFile);
+  }
+});
 
 // Создание аккаунта админа Shoker
 function createAdminAccount() {
-  const adminEmail = "shoker@admin.com"; // Уникальный email для админа
+  const adminEmail = "shoker@admin.com";
   const adminPassword = "Lolp0987";
   const adminNickname = "Shoker";
 
@@ -59,6 +96,11 @@ function createAdminAccount() {
         nickname: adminNickname,
         email: adminEmail,
         isAdmin: true,
+        color: '#ff0000',
+        avatarUrl: 'https://i.imgur.com/J3bYfXK.png',
+        prefix: 'БОСС',
+        isBanned: false,
+        isMuted: false,
         createdAt: firebase.database.ServerValue.TIMESTAMP
       });
     })
@@ -66,7 +108,6 @@ function createAdminAccount() {
       console.log("Админ аккаунт уже существует или ошибка: ", error.message);
     });
 }
-createAdminAccount();
 
 // Открытие/закрытие модального окна
 authBtn.addEventListener('click', () => {
@@ -145,8 +186,8 @@ registerBtn.addEventListener('click', () => {
   const nickname = regNickname.value;
   const password = regPassword.value;
 
-  if (!nickname || !password) {
-    alert('Пожалуйста, заполните все поля');
+  if (!nickname || !password || !avatarFile) {
+    alert('Пожалуйста, заполните все поля и выберите аватар');
     return;
   }
 
@@ -155,28 +196,49 @@ registerBtn.addEventListener('click', () => {
     return;
   }
 
-  const email = nickname.toLowerCase() + "@cuce4ka.com"; // Генерация email на основе ника
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      return database.ref('users/' + userCredential.user.uid).set({
-        nickname: nickname,
-        email: email,
-        isAdmin: false,
-        prefix: '',
-        isBanned: false,
-        isMuted: false,
-        createdAt: firebase.database.ServerValue.TIMESTAMP
+  // Загрузка аватарки в Storage
+  const storageRef = storage.ref('avatars/' + Date.now() + '_' + avatarFile.name);
+  const uploadTask = storageRef.put(avatarFile);
+
+  uploadTask.on('state_changed',
+    (snapshot) => {
+      // Прогресс загрузки (опционально)
+    },
+    (error) => {
+      alert('Ошибка загрузки аватарки: ' + error.message);
+    },
+    () => {
+      // Получение URL загруженной аватарки
+      uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+        // Создание пользователя
+        const email = nickname.toLowerCase() + "@cuce4ka.com";
+        auth.createUserWithEmailAndPassword(email, password)
+          .then((userCredential) => {
+            // Сохранение данных пользователя
+            return database.ref('users/' + userCredential.user.uid).set({
+              nickname: nickname,
+              email: email,
+              isAdmin: false,
+              prefix: '',
+              color: selectedRegColor,
+              avatarUrl: downloadURL,
+              isBanned: false,
+              isMuted: false,
+              createdAt: firebase.database.ServerValue.TIMESTAMP
+            });
+          })
+          .then(() => {
+            currentUser = auth.currentUser;
+            updateUI();
+            authModal.style.display = 'none';
+            alert('Регистрация успешна!');
+          })
+          .catch((error) => {
+            alert('Ошибка регистрации: ' + error.message);
+          });
       });
-    })
-    .then(() => {
-      currentUser = auth.currentUser;
-      updateUI();
-      authModal.style.display = 'none';
-      alert('Регистрация успешна!');
-    })
-    .catch((error) => {
-      alert('Ошибка регистрации: ' + error.message);
-    });
+    }
+  );
 });
 
 // Восстановление пароля через админа
@@ -194,7 +256,6 @@ sendResetBtn.addEventListener('click', () => {
         snapshot.forEach((childSnapshot) => {
           const userData = childSnapshot.val();
           const message = `Я забыл пароль от аккаунта ${nickname}. Пожалуйста, помогите!`;
-          // Здесь предполагается отправка в LS админу (реализуйте через ваш метод связи)
           alert(`Сообщение отправлено админу: ${message}. Ожидайте ответа.`);
           authModal.style.display = 'none';
         });
@@ -272,7 +333,7 @@ submitReviewBtn.addEventListener('click', () => {
         userId: currentUser.uid,
         userNickname: userData.nickname,
         userPrefix: userData.prefix || '',
-        userAvatar: 'https://i.imgur.com/J3bYfXK.png',
+        userAvatar: userData.avatarUrl,
         text: text,
         rating: selectedRating,
         createdAt: firebase.database.ServerValue.TIMESTAMP
@@ -340,16 +401,21 @@ function updateUI() {
   if (currentUser) {
     authBtnText.textContent = 'Профиль';
     reviewForm.style.display = 'block';
+
     database.ref('users/' + currentUser.uid).once('value')
       .then((snapshot) => {
         const userData = snapshot.val();
         userNickname.textContent = userData.nickname;
+        userNickname.style.color = userData.color;
         userPrefix.textContent = userData.prefix ? `[${userData.prefix}]` : '';
+        userAvatar.src = userData.avatarUrl;
+
         if (userData.isBanned) {
           alert('Ваш аккаунт заблокирован!');
           auth.signOut();
           return;
         }
+
         if (userData.isAdmin) {
           adminPanel.style.display = 'block';
           loadAdminPanel();
@@ -371,6 +437,12 @@ auth.onAuthStateChanged((user) => {
 
   if (user) {
     loadReviews();
+  } else {
+    // Сброс данных профиля при выходе
+    userNickname.textContent = 'CuCe4ka';
+    userNickname.style.color = '';
+    userPrefix.textContent = '';
+    userAvatar.src = 'storage/avatar.jpg';
   }
 });
 
@@ -394,6 +466,8 @@ function updateCounter() {
 
 // Анимация загрузки
 window.addEventListener('load', function() {
+  createAdminAccount();
+
   setTimeout(function() {
     const loader = document.getElementById('loader');
     loader.style.opacity = '0';
@@ -410,7 +484,7 @@ window.addEventListener('load', function() {
   }, 2500);
 });
 
-// Наклон карточек и смена цвета (оставлены без изменений)
+// Наклон карточек и смена цвета
 let lastBeta = 0;
 let lastGamma = 0;
 const smoothingFactor = 0.2;
@@ -484,7 +558,7 @@ colorOptions.forEach(option => {
   });
 });
 
-// Плеер (оставлен без изменений)
+// Плеер
 const playBtn = document.getElementById('playBtn');
 const progressBar = document.getElementById('progressBar');
 const audioPlayer = document.getElementById('audioPlayer');
@@ -536,20 +610,24 @@ function loadAdminPanel() {
           const userDiv = document.createElement('div');
           userDiv.className = 'admin-user';
           userDiv.innerHTML = `
-                        <span>${user.nickname} ${user.prefix ? `[${user.prefix}]` : ''}</span>
-                        <div class="admin-actions">
-                            <button class="admin-btn ban-btn" data-uid="${childSnapshot.key}">Бан</button>
-                            <button class="admin-btn mute-btn" data-uid="${childSnapshot.key}">Мут</button>
-                            <button class="admin-btn reset-btn" data-uid="${childSnapshot.key}">Новый пароль</button>
-                            <select class="admin-select" data-uid="${childSnapshot.key}">
-                                <option value="">Выберите префикс</option>
-                                <option value="Крутой герой">Крутой герой</option>
-                                <option value="Админ">Админ</option>
-                                <option value="Еблан">Еблан</option>
-                                <option value="Пидорас">Пидорас</option>
-                            </select>
-                        </div>
-                    `;
+            <div class="admin-user-header">
+              <img src="${user.avatarUrl}" class="admin-avatar" alt="Аватар">
+              <div class="admin-user-info">
+                <div class="admin-nickname" style="color: ${user.color}">${user.nickname}</div>
+                <div class="admin-email">${user.email}</div>
+              </div>
+            </div>
+            <div class="admin-actions">
+              <button class="admin-btn ban-btn" data-uid="${childSnapshot.key}">Бан</button>
+              <button class="admin-btn mute-btn" data-uid="${childSnapshot.key}">Мут</button>
+              <button class="admin-btn prefix-btn" data-uid="${childSnapshot.key}">Префикс</button>
+            </div>
+            <div class="prefix-selector" id="prefixSelector-${childSnapshot.key}" style="display: none;">
+              ${prefixes.map(prefix =>
+            `<div class="prefix-option" data-prefix="${prefix}">${prefix}</div>`
+          ).join('')}
+            </div>
+          `;
           adminUsers.appendChild(userDiv);
 
           // Обработчики действий
@@ -559,27 +637,24 @@ function loadAdminPanel() {
           });
 
           userDiv.querySelector('.mute-btn').addEventListener('click', () => {
-            database.ref('users/' + childSnapshot.key).update({ isMuted: true });
-            alert(`${user.nickname} замучен!`);
+            const isMuted = !user.isMuted;
+            database.ref('users/' + childSnapshot.key).update({ isMuted });
+            alert(`${user.nickname} ${isMuted ? 'замучен' : 'размучен'}!`);
           });
 
-          userDiv.querySelector('.reset-btn').addEventListener('click', () => {
-            const newPassword = Math.random().toString(36).slice(-8);
-            const email = user.email;
-            auth.signInWithEmailAndPassword(email, newPassword) // Тестовый вход для смены
-              .then(() => {
-                alert(`Новый пароль для ${user.nickname}: ${newPassword}`);
-                auth.signOut();
-              })
-              .catch((error) => {
-                alert('Ошибка смены пароля: ' + error.message);
-              });
+          userDiv.querySelector('.prefix-btn').addEventListener('click', () => {
+            const selector = document.getElementById(`prefixSelector-${childSnapshot.key}`);
+            selector.style.display = selector.style.display === 'none' ? 'flex' : 'none';
           });
 
-          userDiv.querySelector('.admin-select').addEventListener('change', (e) => {
-            const prefix = e.target.value;
-            database.ref('users/' + childSnapshot.key).update({ prefix: prefix });
-            alert(`Префикс ${prefix} выдан ${user.nickname}!`);
+          // Обработчики выбора префикса
+          userDiv.querySelectorAll('.prefix-option').forEach(option => {
+            option.addEventListener('click', () => {
+              const prefix = option.getAttribute('data-prefix');
+              database.ref('users/' + childSnapshot.key).update({ prefix });
+              alert(`Префикс "${prefix}" выдан ${user.nickname}!`);
+              document.getElementById(`prefixSelector-${childSnapshot.key}`).style.display = 'none';
+            });
           });
         }
       });
