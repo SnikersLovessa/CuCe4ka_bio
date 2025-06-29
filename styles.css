@@ -855,19 +855,19 @@ body {
   transition: all 0.3s;
 }
 
-.ban-btn {
-  background: #ff4d4d;
-  color: white;
+.ban-btn { 
+  background: #ff4d4d; 
+  color: white; 
 }
 
-.mute-btn {
-  background: #ffcc00;
-  color: black;
+.mute-btn { 
+  background: #ffcc00; 
+  color: black; 
 }
 
-.prefix-btn {
-  background: #9b51e0;
-  color: white;
+.prefix-btn { 
+  background: #9b51e0; 
+  color: white; 
 }
 
 .prefix-selector {
@@ -935,4 +935,3 @@ body {
     padding: 15px;
   }
 }
-
