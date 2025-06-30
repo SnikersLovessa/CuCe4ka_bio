@@ -1,223 +1,297 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CuCe4ka - Игровая визитка</title>
-  <link rel="stylesheet" href="styles.css">
-  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>СВИН SHOP | Жирные свиньи на продажу</title>
+    <style>
+        :root {
+            --pink: #ff69b4;
+            --dark: #1a1a1a;
+            --gold: #ffd700;
+            --brown: #8b4513;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: var(--dark);
+            color: white;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--pink), var(--gold));
+            padding: 15px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px var(--brown);
+            border-bottom: 3px dashed var(--gold);
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            background-color: black;
+            padding: 10px;
+        }
+
+        .nav a {
+            color: var(--pink);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 8px 0;
+            text-align: center;
+            border-bottom: 1px solid var(--pink);
+        }
+
+        .nav a:last-child {
+            border-bottom: none;
+        }
+
+        .nav a:hover {
+            text-shadow: 0 0 5px var(--pink);
+            background-color: rgba(255, 105, 180, 0.1);
+        }
+
+        .main {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .pig-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .pig-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 900px) {
+            .pig-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .pig-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .pig-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--pink);
+            border-radius: 8px;
+            padding: 12px;
+            transition: transform 0.3s;
+        }
+
+        .pig-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px var(--pink);
+        }
+
+        .pig-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--gold);
+        }
+
+        .pig-title {
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin: 8px 0;
+            word-break: break-word;
+        }
+
+        .pig-price {
+            font-size: 1.1rem;
+            color: var(--pink);
+            font-weight: bold;
+        }
+
+        .buy-btn {
+            background: var(--pink);
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .buy-btn:hover {
+            background: var(--gold);
+            color: black;
+            transform: scale(1.05);
+        }
+
+        .footer {
+            background: black;
+            color: var(--pink);
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            border-top: 2px dashed var(--gold);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        /* Анимация для заголовка */
+        @keyframes pig-shake {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-5deg); }
+            40% { transform: rotate(5deg); }
+            60% { transform: rotate(-5deg); }
+            80% { transform: rotate(5deg); }
+        }
+
+        .pig-animation {
+            animation: pig-shake 2s infinite;
+            display: inline-block;
+        }
+
+        /* Меню для мобильных */
+        .mobile-menu-btn {
+            display: none;
+            background: var(--pink);
+            color: black;
+            border: none;
+            padding: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav {
+                display: none;
+            }
+            
+            .nav.active {
+                display: flex;
+            }
+            
+            .header {
+                font-size: 1.5rem;
+                padding: 10px;
+            }
+            
+            .pig-img {
+                height: 150px;
+            }
+        }
+    </style>
 </head>
 <body>
-<!-- Кастомная анимация загрузки -->
-<div class="loader" id="loader">
-  <div class="loader-content">
-    <div class="loader-ring"></div>
-    <div class="loader-ring"></div>
-    <div class="loader-ring"></div>
-    <img src="storage/avatar.jpg" class="loader-avatar" alt="Загрузка">
-  </div>
-  <div class="loader-text">Загрузка</div>
-</div>
-
-<!-- Фоновое видео -->
-<video autoplay muted loop class="video-background" id="bgVideo">
-  <source src="storage/background.mp4" type="video/mp4">
-</video>
-
-<!-- Кнопка авторизации -->
-<button class="auth-btn" id="authBtn">
-  <span id="authBtnText">Войти</span>
-</button>
-
-<!-- Модальное окно авторизации -->
-<div class="modal" id="authModal">
-  <div class="modal-content">
-    <button class="close-modal" id="closeModal">×</button>
-    <h2 class="modal-title" id="modalTitle">Вход в аккаунт</h2>
-
-    <div id="loginForm">
-      <div class="form-group">
-        <label for="loginNickname">Никнейм</label>
-        <input type="text" id="loginNickname" class="form-input" placeholder="Ваш никнейм">
-      </div>
-      <div class="form-group">
-        <label for="loginPassword">Пароль</label>
-        <input type="password" id="loginPassword" class="form-input" placeholder="Ваш пароль">
-      </div>
-      <button class="submit-btn" id="loginBtn">Войти</button>
-
-      <div class="auth-links">
-        <span class="auth-link" id="forgotPassword">Забыли пароль?</span>
-        <span class="auth-link" id="goToRegister">Нет аккаунта?</span>
-      </div>
+    <button class="mobile-menu-btn" id="menuBtn">🐷 МЕНЮ СВИН SHOP 🐷</button>
+    
+    <div class="header">
+        <h1><span class="pig-animation">🐷</span> СВИН SHOP <span class="pig-animation">🐷</span></h1>
+        <p>Только самые жирные и сочные свиньи!</p>
     </div>
 
-    <div id="registerForm" style="display: none;">
-      <div class="form-group">
-        <label for="regNickname">Никнейм</label>
-        <input type="text" id="regNickname" class="form-input" placeholder="Ваш никнейм">
-      </div>
-      <div class="form-group">
-        <label for="regPassword">Пароль</label>
-        <input type="password" id="regPassword" class="form-input" placeholder="Придумайте пароль">
-      </div>
-      
-      <div class="form-group">
-        <label>Цвет ника</label>
-        <div class="color-palette-reg">
-          <div class="color-option-reg active" style="background: #9b51e0;" data-color="#9b51e0"></div>
-          <div class="color-option-reg" style="background: #5865F2;" data-color="#5865F2"></div>
-          <div class="color-option-reg" style="background: #1DB954;" data-color="#1DB954"></div>
-          <div class="color-option-reg" style="background: #FF5733;" data-color="#FF5733"></div>
-          <div class="color-option-reg" style="background: #00FFFF;" data-color="#00FFFF"></div>
+    <div class="nav" id="navMenu">
+        <a href="#">Главная</a>
+        <a href="#">Каталог</a>
+        <a href="#">О нас</a>
+        <a href="#">Контакты</a>
+    </div>
+
+    <div class="main">
+        <h2>🔥 НАШИ ЛУЧШИЕ СВИНЬИ 🔥</h2>
+        
+        <div class="pig-grid">
+            <!-- Карточка свиньи 1 -->
+            <div class="pig-card">
+                <img src="/storage/pig1.jpg" alt="Жирная свинья" class="pig-img">
+                <h3 class="pig-title">СВИН УЛЬТРА ЖИРНЫЙ</h3>
+                <p class="pig-price">9999 ₽</p>
+                <button class="buy-btn">КУПИТЬ</button>
+            </div>
+
+            <!-- Карточка свиньи 2 -->
+            <div class="pig-card">
+                <img src="/storage/pig2.jpg" alt="Свинья в грязи" class="pig-img">
+                <h3 class="pig-title">СВИН ГРЯЗНЫЙ</h3>
+                <p class="pig-price">5000 ₽</p>
+                <button class="buy-btn">КУПИТЬ</button>
+            </div>
+
+            <!-- Карточка свиньи 3 -->
+            <div class="pig-card">
+                <img src="/storage/pig3.jpg" alt="Свинья с деньгами" class="pig-img">
+                <h3 class="pig-title">СВИН РИЧ</h3>
+                <p class="pig-price">7500 ₽</p>
+                <button class="buy-btn">КУПИТЬ</button>
+            </div>
+
+            <!-- Карточка свиньи 4 -->
+            <div class="pig-card">
+                <img src="/storage/pig4.jpg" alt="Свинья в шляпе" class="pig-img">
+                <h3 class="pig-title">СВИН СТИЛЬНЫЙ</h3>
+                <p class="pig-price">6000 ₽</p>
+                <button class="buy-btn">КУПИТЬ</button>
+            </div>
         </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="regAvatar">Аватарка</label>
-        <div class="avatar-upload">
-          <input type="file" id="regAvatar" accept="image/*" style="display: none;">
-          <img src="https://i.imgur.com/J3bYfXK.png" class="avatar-preview" id="avatarPreview">
-          <button class="submit-btn" id="uploadBtn" style="margin-top: 10px;">Выбрать аватар</button>
-        </div>
-      </div>
-      
-      <button class="submit-btn" id="registerBtn">Зарегистрироваться</button>
-
-      <div class="auth-links">
-        <span class="auth-link" id="goToLogin">Уже есть аккаунт?</span>
-      </div>
     </div>
 
-    <div id="forgotForm" style="display: none;">
-      <div class="form-group">
-        <label for="forgotNickname">Никнейм</label>
-        <input type="text" id="forgotNickname" class="form-input" placeholder="Ваш никнейм">
-      </div>
-      <button class="submit-btn" id="sendResetBtn">Запросить помощь</button>
-
-      <div class="auth-links">
-        <span class="auth-link" id="backToLogin">Назад к входу</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="container" id="mainContainer">
-  <div class="card" id="mainCard">
-    <!-- Счётчик посещений -->
-    <div class="visitor-counter">
-      <span class="counter-icon">👁️</span>
-      <span id="visitCount">0</span>
+    <div class="footer">
+        <p>© 2023 СВИН SHOP | Все права защищены</p>
+        <p>Связь: <a href="mailto:pigshop@example.com">pigshop@example.com</a></p>
     </div>
 
-    <!-- Палитра цветов -->
-    <div class="color-palette">
-      <div class="color-option" style="background: #9b51e0;" data-color="#9b51e0" data-dark="#2d0a4d"></div>
-      <div class="color-option" style="background: #5865F2;" data-color="#5865F2" data-dark="#2a2a6e"></div>
-      <div class="color-option" style="background: #1DB954;" data-color="#1DB954" data-dark="#0a4d27"></div>
-      <div class="color-option" style="background: #FF5733;" data-color="#FF5733" data-dark="#6d1f0f"></div>
-      <div class="color-option" style="background: #00FFFF;" data-color="#00FFFF" data-dark="#006666"></div>
-    </div>
-
-    <div class="avatar-container">
-      <div class="avatar-frame">
-        <img src="storage/avatar.jpg" class="avatar" alt="Аватар" id="userAvatar">
-      </div>
-      <div class="nickname" id="userNickname">CuCe4ka</div>
-      <div class="name" id="userPrefix"></div>
-    </div>
-    <div class="social-links">
-      <a href="#" class="social-btn">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Telegram_2019_Logo.svg" class="social-icon" alt="Telegram">
-      </a>
-      <a href="#" class="social-btn">
-        <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" class="social-icon" alt="Discord">
-      </a>
-      <a href="#" class="social-btn">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/7/74/Spotify_App_Logo.svg" class="social-icon" alt="Spotify">
-      </a>
-    </div>
-
-    <!-- Плеер -->
-    <div class="music-player">
-      <div class="player-title">Now Playing: My Track</div>
-      <div class="player-controls">
-        <button class="player-btn">⏮</button>
-        <button class="player-btn" id="playBtn">▶</button>
-        <button class="player-btn">⏭</button>
-      </div>
-      <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
-      </div>
-      <audio id="audioPlayer" src="storage/music.mp3"></audio>
-    </div>
-  </div>
-
-  <div class="wide-card" id="gamesCard">
-    <div class="games-title">Игровая статистика</div>
-    <div class="game-item">
-      <span class="game-name">Minecraft</span>
-      <span class="game-hours">2,092 ч.</span>
-    </div>
-    <div class="game-item">
-      <span class="game-name">Squad</span>
-      <span class="game-hours">300 ч.</span>
-    </div>
-    <div class="game-item">
-      <span class="game-name">CS 2</span>
-      <span class="game-hours">697 ч.</span>
-    </div>
-  </div>
-</div>
-
-<!-- Секция отзывов -->
-<div class="reviews-section" id="reviewsSection">
-  <h2 class="section-title">Отзывы игроков</h2>
-
-  <div class="review-form" id="reviewForm" style="display: none;">
-    <textarea class="review-textarea" id="reviewText" placeholder="Напишите ваш отзыв..."></textarea>
-    <div class="rating-container">
-      <span class="rating-label">Оценка:</span>
-      <div class="rating-stars" id="ratingStars">
-        <span class="star" data-value="1">☆</span>
-        <span class="star" data-value="2">☆</span>
-        <span class="star" data-value="3">☆</span>
-        <span class="star" data-value="4">☆</span>
-        <span class="star" data-value="5">☆</span>
-      </div>
-    </div>
-    <button class="submit-btn" id="submitReviewBtn">Отправить отзыв</button>
-  </div>
-
-  <div class="review-list" id="reviewList">
-    <div class="review-item">
-      <div class="review-header">
-        <img src="https://i.imgur.com/J3bYfXK.png" class="review-avatar" alt="Аватар">
-        <div class="review-user">
-          <div class="review-name">Пример пользователя</div>
-          <div class="review-date">01.01.2023</div>
-        </div>
-        <div class="review-rating">★★★★★</div>
-      </div>
-      <div class="review-content">
-        Это пример отзыва. Настоящие отзывы будут загружаться из базы данных после реализации системы.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Панель админа -->
-<div class="admin-panel" id="adminPanel" style="display: none;">
-  <h2 class="admin-title">Панель админа</h2>
-  <div class="admin-users" id="adminUsers"></div>
-</div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
-<script src="script.js"></script>
+    <script>
+        // Мобильное меню
+        const menuBtn = document.getElementById('menuBtn');
+        const navMenu = document.getElementById('navMenu');
+        
+        menuBtn.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+        });
+        
+        // Адаптация изображений
+        function adjustImageSizes() {
+            const pigCards = document.querySelectorAll('.pig-card');
+            const windowWidth = window.innerWidth;
+            
+            pigCards.forEach(card => {
+                const img = card.querySelector('.pig-img');
+                if (windowWidth < 600) {
+                    img.style.height = '180px';
+                } else if (windowWidth < 900) {
+                    img.style.height = '220px';
+                } else {
+                    img.style.height = '250px';
+                }
+            });
+        }
+        
+        window.addEventListener('resize', adjustImageSizes);
+        window.addEventListener('load', adjustImageSizes);
+    </script>
 </body>
 </html>
